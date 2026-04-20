@@ -5,13 +5,22 @@ app_name = "library"
 version = "0.1"
 is_active=True
 book_count=0
-library = []
+
+def read_file(path:str) -> list:
+    try:
+        with open(path,"r",encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as err:
+        print(err)
+        return []
+library = read_file("./library.json")
+
 
 def count(fn:types.FunctionType):
     def wrap(*args,**kwargs):
-        fn(*args,**kwargs)
-        wrap.counter+=1
-    wrap.counter = 0
+        wrap.counter+=1 # type: ignore
+        return fn(*args,**kwargs)
+    wrap.counter = 0 # type: ignore
     return wrap
 
 
@@ -59,7 +68,7 @@ def remove_book(title:str) -> None :
 add_book(create_book("Əli və Nino", "Qurban Səid", 1937, "Roman"))
 add_book(create_book("1984", "George Orwell", 1949, "Distopiya"))
 add_book(create_book("Sapiens", "Yuval Noah Harari", 2011, "Tarix"))
-print(add_book.counter)
+print(add_book.counter) # type: ignore
 
 
 book_id = ("ISBN-001", "Əli və Nino")
@@ -92,8 +101,11 @@ def book_iterator(genre_filter:str):
 
 
 def write_to_json(library:list):
-    with open("library.json","w+",encoding="utf-8") as f:
-        json.dump(library,f,ensure_ascii=False,indent=4)
+    try:
+        with open("library.json","w",encoding="utf-8") as f:
+            json.dump(library,f,ensure_ascii=False,indent=4)
+    except Exception as err:
+        print(err)
 
 write_to_json(library)
 
@@ -118,3 +130,8 @@ class Library:
     
     def show_all_books(self):
         pass
+
+class Ebook(Book):
+    def __init__(self, title, author, year, genre="Unknown",filesize=0) -> None:
+        super().__init__(title, author, year, genre)
+        self.filesize = 0

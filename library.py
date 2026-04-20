@@ -1,8 +1,19 @@
+import types
+import json
+
 app_name = "library"
 version = "0.1"
 is_active=True
 book_count=0
 library = []
+
+def count(fn:types.FunctionType):
+    def wrap(*args,**kwargs):
+        fn(*args,**kwargs)
+        wrap.counter+=1
+    wrap.counter = 0
+    return wrap
+
 
 def create_book(title,author,year,genre="Unknown"):
     book = {
@@ -29,6 +40,7 @@ def book_era(book:dict)  -> bool|str:
     return True
 
 
+@count
 def add_book(book:dict) -> None:
     # global library
     library.append(book)
@@ -47,6 +59,8 @@ def remove_book(title:str) -> None :
 add_book(create_book("Əli və Nino", "Qurban Səid", 1937, "Roman"))
 add_book(create_book("1984", "George Orwell", 1949, "Distopiya"))
 add_book(create_book("Sapiens", "Yuval Noah Harari", 2011, "Tarix"))
+print(add_book.counter)
+
 
 book_id = ("ISBN-001", "Əli və Nino")
 print(f"ID tuple: {book_id}")
@@ -71,6 +85,17 @@ authors = [book["author"] for book in library ]
 
 print(f"Theese are authors : {authors}")
 
+def book_iterator(genre_filter:str):
+    for book in library:
+        if book["genre"]== genre_filter:
+            yield book
+
+
+def write_to_json(library:list):
+    with open("library.json","w+",encoding="utf-8") as f:
+        json.dump(library,f,ensure_ascii=False,indent=4)
+
+write_to_json(library)
 
 class Book:
     def __init__(self,title,author,year,genre="Unknown") -> None:
@@ -87,7 +112,6 @@ class Book:
 class Library:
     def __init__(self) -> None:
         self.books = []
-    
 
     def add_book(self,book:Book):
         self.books.append(book)
